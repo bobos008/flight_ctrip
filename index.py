@@ -100,10 +100,10 @@ def get_data():
         to_city = citys[1]
         from_date = setoutdate
         to_date = backdate
-        flight_obj = FlightsCtrip()
         num = 0
         while 1:
-            if num > 3:
+            flight_obj = FlightsCtrip()
+            if num > 4:
                 break
             flight_data = flight_obj.get_fligth_product(from_city, to_city, from_date, to_date, flight_way)
             if not flight_data['lowestPrice']:
@@ -112,7 +112,7 @@ def get_data():
                 continue
             break
         flight_data_list.append(flight_data)
-        time.sleep(5)
+        time.sleep(3)
     # print(json.dumps(flight_data_list))
     sort_flight_data_list = sorted(flight_data_list, key=lambda x: x['lowestPrice'])
     current_flight_data = sort_flight_data_list
