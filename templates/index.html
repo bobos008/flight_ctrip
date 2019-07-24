@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>机票查询</title>
+    <link rel="stylesheet" href="/static/layer/theme/default/layer.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/jquery-3.3.1.js"></script>
+    <script src="/static/layer/layer.js"></script>
+    <script src="/static/laydate/laydate.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <style>
+        .content table tbody tr td {
+            text-align: center;
+        }
+        .content table thead tr th {
+            text-align: center;
+        }
+        .province, .flight_way {
+            width: 100%;
+            height: 34px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        /*.btn {*/
+            /*background-color: #009688;*/
+            /*border-color: #009688;*/
+        /*}*/
+        /* .btn-primary {
+            background-color: #083f39;
+            border-color: #083f39;
+        } */
+        /*.btn-primary:hover {*/
+            /*background-color: #083f39;*/
+            /*border-color: #083f39;*/
+        /*}*/
+    </style>
+</head>
+<body>
+    <div class="container">
+       <div class="operate col-sm-12" style="margin-top: 6px;">
+           <div class="col-sm-2">
+               <select name="province" id="province" class="province">
+                   <option value="guangdong">广东</option>
+                   <option value="jiangsu">江苏</option>
+                   <option value="shanghai">上海</option>
+                   <option value="chongqing">重庆</option>
+                   <option value="guizhou">贵州</option>
+                   <option value="fujian">福建</option>
+                   <option value="guangxi">广西</option>
+                   <option value="yunnan">云南</option>
+                   <option value="zhejiang">浙江</option>
+                   <option value="jiangxi">江西</option>
+                   <option value="sichuan">四川</option>
+                   <option value="hunan">湖南</option>
+                   <option value="hubei">湖北</option>
+                   <option value="anhui">安徽</option>
+                   <option value="shandong">山东</option>
+                   <option value="heilongjiang">黑龙江</option>
+                   <option value="liaoning">辽宁</option>
+                   <option value="hainan">海南</option>
+                   <option value="jilin">吉林</option>
+                   <option value="xinjiang">新疆</option>
+                   <option value="neimenggu">内蒙古</option>
+                   <option value="shanxi">山西</option>
+                   <option value="hebei">河北</option>
+                   <option value="gansu">甘肃</option>
+                   <option value="shanxi1">陕西</option>
+                   <option value="xizang">西藏</option>
+                   <option value="henan">河南</option>
+                   <option value="qinghai">青海</option>
+                   <option value="ningxia">宁夏</option>
+               </select>
+           </div>
+           <div class="col-sm-2">
+               <input type="text" class="setoutdate form-control" placeholder="出发日期" readonly="readonly"/>
+           </div>
+           <div class="col-sm-2">
+               <input type="text" class="backdate form-control" placeholder="返回日期" readonly="readonly"/>
+           </div>
+           <div class="col-sm-2">
+               <select name="flight_way" class="flight_way">
+                   <option value="Roundtrip">往返</option>
+                   <option value="Oneway">返程</option>
+               </select>
+           </div>
+           <div class="col-sm-1">
+               <button id="get-data" class="btn btn-default" click_time=0>查询</button>
+           </div>
+           <div class="col-sm-1">
+               <button id="download-data" class="btn btn-default" click_time=0 style="display: none;">导出</button>
+           </div>
+       </div>
+        <!-- <div class="col-sm-12" style="margin-top: 10px;margin-bottom: 10px;">
+            <div class="col-sm-4">
+                <button id="get-data" class="btn btn-default">刷新</button>
+            </div>
+        </div> -->
+        <div class="content col-sm-12">
+            <table class="table table-condensed text-center">
+                <caption>机票信息</caption>
+                <thead>
+                    <tr>
+                        <th>网站</th>
+                        <th>出发地</th>
+                        <th>目的地</th>
+                        <th>航空公司/型号</th>
+                        <th>出发时间/机场</th>
+                        <th>到达时间/机场</th>
+                        <th>价格</th>
+                    </tr>
+                </thead>
+                <tbody id="table-tbody">
+<!--                    <tr>-->
+<!--                        <td style="padding-top:13px;"><b>携程</b></td>-->
+<!--                        <td style="padding-top:13px;"><b>广州</b></td>-->
+<!--                        <td style="padding-top:13px;"><b>北京</b></td>-->
+<!--                        <td>-->
+<!--                            <div><b>南方航空</b></div>-->
+<!--                            <div>HU7801 波音737(中)</div>-->
+<!--                        </td>-->
+<!--                        <td>-->
+<!--                            <div><b>22:50</b></div>-->
+<!--                            <div>白云机场T1</div>-->
+<!--                        </td>-->
+<!--                        <td style="padding-top:10px;">-->
+<!--                            3小时5分钟-->
+<!--                        </td>-->
+<!--                        <td>-->
+<!--                            <div><b>01:55</b></div>-->
+<!--                            <div>首都机场T1</div>-->
+<!--                        </td>-->
+<!--                        <td>-->
+<!--                            <div style="color:chocolate;">¥<b>1380</b></div>-->
+<!--                            <div>6.8折</div>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+                </tbody>
+            </table>
+            <div id="loading" class="text-center">
+                <div><b>请查询</b></div>
+            </div>
+        </div>
+    </div>    
+</body>
+
+<script>
+    laydate.render({
+        elem: '.setoutdate'
+    });
+    laydate.render({
+        elem: '.backdate'
+    });
+
+    // 格式化时间并返回时间戳
+    function format_time(cdate) {
+        formate_time = cdate.replace('/-/g', '/')
+        date_obj = new Date(formate_time);
+        date_time = date_obj.getTime()/1000;
+        return date_time
+    }
+
+    function get_data(setoutdate, backdate, province, flight_way) {
+        $('#get-data').disabled=true;
+        $('#table-tbody').html("");
+
+        $('#loading').html('<div><b>页面加载中，请等待...</b></div>')
+        $.ajax({
+            url: '/get_data',
+            type: 'get',
+            data: {'setoutdate': setoutdate, 'backdate': backdate, 'province': province, 'flight_way': flight_way},
+            dataType: 'json',
+            success: function (data) {
+                $('#download-data').show();
+                $('#loading').html("");
+                for (let i = 0; i < data.length; i++) {
+                    $('#table-tbody').append('<tr>');
+                    $('#table-tbody').append('<td style="padding-top:13px;"><b>携程</b></td>');
+                    $('#table-tbody').append('<td style="padding-top:13px;"><b>' + data[i]['flight']['departureAirportInfo']['cityName'] + '</b></td>');
+                    $('#table-tbody').append('<td style="padding-top:13px;"><b>' + data[i]['flight']['arrivalAirportInfo']['cityName'] + '</b></td>');
+                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['airlineName'] + '/' + data[i]['flight']['flightNumber'] + '</b></div></td>');
+                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['departureDate'] +'</b></div><div>' + data[i]['flight']['departureAirportInfo']['airportName'] + '</div></td>');
+                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['arrivalDate'] +'</b></div><div>' + data[i]['flight']['arrivalAirportInfo']['airportName'] + '</div></td>');
+                    $('#table-tbody').append('<td><div style="color:chocolate;font-size:40px;">¥<b>'+ data[i]['lowestPrice'] +'</b></div></td>');
+                    $('#table-tbody').append('</tr>');
+                }
+            },
+            error: function () {
+                layer.msg('异常');
+                $('#loading').html('<div><b>重新查询!</b></div>')
+            }
+        });
+        $('#get-data').disabled=false;
+    }
+
+    $(function () {
+        $("#get-data").on('click', function () {
+            
+            var now_date = new Date();
+            var now_year = now_date.getFullYear();
+            var now_month = now_date.getMonth() + 1;
+            var now_day = now_date.getDate();
+            var now_time = now_year + '-' + now_month + '-' + now_day;
+            var now_timestamp = format_time(now_time);
+            var max_time = now_timestamp + (30 * 3 * 24 * 3600)
+
+            province = $('.province').val();
+            flight_way = $('.flight_way').val();
+            
+            setoutdate = $('.setoutdate').val();
+            if(!setoutdate) {
+                layer.msg("出发日期不能为空！");
+                return false
+            }
+            setout_timestamp = format_time(setoutdate)
+            if(setout_timestamp < now_timestamp) {
+                layer.msg("出发日期不能是已经过去的时间！");
+                return false
+            }
+            if(setout_timestamp > max_time) {
+                layer.msg("出发日期不能超过3个月！");
+                return false
+            }
+
+            backdate = $('.backdate').val();
+            if(!backdate) {
+                layer.msg("返回日期不能为空！");
+                return false;
+            }
+            backdate_timestamp = format_time(backdate)
+            if(backdate_timestamp < now_timestamp) {
+                layer.msg("返回日期不能是已经过去的时间！");
+                return false
+            }
+            if(backdate_timestamp > max_time) {
+                layer.msg("返回日期不能超过3个月！");
+                return false
+            }
+            if(setout_timestamp > backdate_timestamp) {
+                layer.msg("出发日期不能大于返回日期！");
+                return false
+            }
+
+
+            click_time = parseInt($(this).attr('click_time'));
+            var click_now_date = (new Date()).getTime();
+            if(click_now_date > (click_time+60*1000)) {
+                $('#get-data').attr('click_time', click_now_date);
+                get_data(setoutdate, backdate, province, flight_way);
+            } else {
+<!--                layer.msg("两次点击相隔5分钟！");-->
+                layer.msg("两次点击相隔30秒！");
+                return false;
+            }
+        });
+
+        $('#download-data').on('click', function() {
+            download_time = ((new Date()).getTime())/1000;
+            download_url = '/downloads/?filename=' + String(parseInt(download_time))
+            window.open(download_url);
+        });
+    })
+</script>
+</html>

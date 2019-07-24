@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>机票查询</title>
+    <link rel="stylesheet" href="../static/layer/theme/default/layer.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <script src="../static/js/jquery-3.3.1.js"></script>
+    <script src="../static/layer/layer.js"></script>
+    <script src="../static/laydate/laydate.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <style>
+        .content table tbody tr td {
+            text-align: center;
+        }
+        .content table thead tr th {
+            text-align: center;
+        }
+        /*.btn {*/
+            /*background-color: #009688;*/
+            /*border-color: #009688;*/
+        /*}*/
+        /* .btn-primary {
+            background-color: #083f39;
+            border-color: #083f39;
+        } */
+        /*.btn-primary:hover {*/
+            /*background-color: #083f39;*/
+            /*border-color: #083f39;*/
+        /*}*/
+    </style>
+</head>
+<body>
+    <div class="container">
+<!--        <div class="operate col-sm-12" style="margin-top: 6px;">-->
+<!--            <div class="col-sm-2">-->
+<!--                <input type="text" class="form-control" placeholder="出发地"/>-->
+<!--            </div>-->
+<!--            <div class="col-sm-2">-->
+<!--                <input type="text" class="form-control" placeholder="到达地"/>-->
+<!--            </div>-->
+<!--            <div class="col-sm-2">-->
+<!--                <input type="text" class="setoutdate form-control" placeholder="出发日期"/>-->
+<!--            </div>-->
+<!--            <div class="col-sm-2">-->
+<!--                <input type="text" class="backdate form-control" placeholder="返回日期"/>-->
+<!--            </div>-->
+<!--            <div class="col-sm-4">-->
+<!--                &lt;!&ndash; <button class="btn btn-default">查询</button> &ndash;&gt;-->
+<!--                <button class="btn btn-primary">查询</button>-->
+<!--                <button class="btn btn-primary">停止</button>-->
+<!--            </div>-->
+<!--        </div>-->
+        <div class="col-sm-12" style="margin-top: 10px;margin-bottom: 10px;">
+            <div class="col-sm-4">
+                <button id="get-data" class="btn btn-default">刷新</button>
+            </div>
+        </div>
+        <div class="content col-sm-12">
+            <table class="table table-condensed text-center">
+                <caption>机票信息</caption>
+                <thead>
+                    <tr>
+                        <th>网站</th>
+                        <th>出发地</th>
+                        <th>目的地</th>
+                        <th>航空公司/型号</th>
+                        <th>出发时间/机场/站台</th>
+<!--                        <th>用时</th>-->
+                        <th>到达时间/机场/站台</th>
+                        <th>价格/打折</th>
+                    </tr>
+                </thead>
+                <tbody id="table-tbody">
+<!--                    <tr>-->
+<!--                        <td style="padding-top:13px;"><b>携程</b></td>-->
+<!--                        <td style="padding-top:13px;"><b>广州</b></td>-->
+<!--                        <td style="padding-top:13px;"><b>北京</b></td>-->
+<!--                        <td>-->
+<!--                            <div><b>南方航空</b></div>-->
+<!--                            <div>HU7801 波音737(中)</div>-->
+<!--                        </td>-->
+<!--                        <td>-->
+<!--                            <div><b>22:50</b></div>-->
+<!--                            <div>白云机场T1</div>-->
+<!--                        </td>-->
+<!--                        <td style="padding-top:10px;">-->
+<!--                            3小时5分钟-->
+<!--                        </td>-->
+<!--                        <td>-->
+<!--                            <div><b>01:55</b></div>-->
+<!--                            <div>首都机场T1</div>-->
+<!--                        </td>-->
+<!--                        <td>-->
+<!--                            <div style="color:chocolate;">¥<b>1380</b></div>-->
+<!--                            <div>6.8折</div>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+                </tbody>
+            </table>
+            <div id="loading" class="text-center">
+                <div><b>请刷新</b></div>
+            </div>
+        </div>
+    </div>    
+</body>
+
+<script>
+    laydate.render({
+        elem: '.setoutdate'
+    });
+    laydate.render({
+        elem: '.backdate'
+    });
+
+    function get_data() {
+        $('#loading').html('<div><b>页面加载中，请等待...</b></div>')
+        $('#get-data').disabled=true;
+        $.ajax({
+        url: '/get_data',
+        type: 'get',
+        dataType: 'json',
+        success: function (data) {
+            for (let i = 0; i < data.length; i++) {
+                $('#loading').html("");
+                $('#table-tbody').html("");
+                $('#table-tbody').append('<tr>');
+                $('#table-tbody').append('<td style="padding-top:13px;"><b>携程</b></td>');
+                $('#table-tbody').append('<td style="padding-top:13px;"><b>' + data[i]['flight']['departureAirportInfo']['cityName'] + '</b></td>');
+                $('#table-tbody').append('<td style="padding-top:13px;"><b>' + data[i]['flight']['arrivalAirportInfo']['cityName'] + '</b></td>');
+                $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['airlineName'] +'</b></div></td>');
+                $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['departureDate'] +'</b></div><div>' + data[i]['flight']['departureAirportInfo']['airportName'] + '</div></td>');
+                $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['arrivalDate'] +'</b></div><div>' + data[i]['flight']['arrivalAirportInfo']['airportName'] + '</div></td>');
+                $('#table-tbody').append('<td><div style="color:chocolate;font-size:40px;">¥<b>'+ data[i]['characteristic']['lowestPrice'] +'</b></div></td>');
+                $('#table-tbody').append('</tr>');
+            }
+        },
+        error: function () {
+            alert('异常')
+        }
+
+        });
+        $('#get-data').disabled=false;
+    }
+
+    $(function () {
+        $("#get-data").on(`click`, function () {
+            get_data();
+        });
+    })
+</script>
+</html>
