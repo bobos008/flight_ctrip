@@ -83,21 +83,20 @@
            <div class="col-sm-2">
                <select name="flight_way" class="flight_way">
                    <option value="Roundtrip">往返</option>
-                   <option value="Oneway">返程</option>
+                   <option value="Oneway">单程</option>
                </select>
            </div>
-           <div class="col-sm-1">
+           <div class="col-sm-2">
                <button id="get-data" class="btn btn-default" click_time=0>查询</button>
-           </div>
-           <div class="col-sm-1">
                <button id="download-data" class="btn btn-default" click_time=0 style="display: none;">导出</button>
            </div>
+           <div class="col-sm-1">
+               <button id="time-all-data" class="btn btn-default">定时查询</button>
+           </div>
+           <div class="col-sm-1">
+               <button id="download-all-data" class="btn btn-default">全部导出</button>
+           </div>
        </div>
-        <!-- <div class="col-sm-12" style="margin-top: 10px;margin-bottom: 10px;">
-            <div class="col-sm-4">
-                <button id="get-data" class="btn btn-default">刷新</button>
-            </div>
-        </div> -->
         <div class="content col-sm-12">
             <table class="table table-condensed text-center">
                 <caption>机票信息</caption>
@@ -106,9 +105,10 @@
                         <th>网站</th>
                         <th>出发地</th>
                         <th>目的地</th>
-                        <th>航空公司/型号</th>
-                        <th>出发时间/机场</th>
-                        <th>到达时间/机场</th>
+                        <th>航空公司/型号(去)</th>
+                        <th>出发时间/机场(去)</th>
+                        <th>航空公司/型号(返)</th>
+                        <th>出发时间/机场(返)</th>
                         <th>价格</th>
                     </tr>
                 </thead>
@@ -178,11 +178,12 @@
                 for (let i = 0; i < data.length; i++) {
                     $('#table-tbody').append('<tr>');
                     $('#table-tbody').append('<td style="padding-top:13px;"><b>携程</b></td>');
-                    $('#table-tbody').append('<td style="padding-top:13px;"><b>' + data[i]['flight']['departureAirportInfo']['cityName'] + '</b></td>');
-                    $('#table-tbody').append('<td style="padding-top:13px;"><b>' + data[i]['flight']['arrivalAirportInfo']['cityName'] + '</b></td>');
-                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['airlineName'] + '/' + data[i]['flight']['flightNumber'] + '</b></div></td>');
-                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['departureDate'] +'</b></div><div>' + data[i]['flight']['departureAirportInfo']['airportName'] + '</div></td>');
-                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['arrivalDate'] +'</b></div><div>' + data[i]['flight']['arrivalAirportInfo']['airportName'] + '</div></td>');
+                    $('#table-tbody').append('<td style="padding-top:13px;"><b>' + data[i]['flight']['fromCity'] + '</b></td>');
+                    $('#table-tbody').append('<td style="padding-top:13px;"><b>' + data[i]['flight']['toCity'] + '</b></td>');
+                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['tripInfo']['airlineName'] + '/' + data[i]['flight']['tripInfo']['flightNumber'] + '</b></div></td>');
+                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['tripInfo']['departureDate'] +'</b></div><div>' + data[i]['flight']['tripInfo']['airportName'] + '</div></td>');
+                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['backTripInfo']['airlineName'] + '/' + data[i]['flight']['backTripInfo']['flightNumber'] + '</b></div></td>');
+                    $('#table-tbody').append('<td><div><b>'+ data[i]['flight']['backTripInfo']['departureDate'] +'</b></div><div>' + data[i]['flight']['backTripInfo']['airportName'] + '</div></td>');
                     $('#table-tbody').append('<td><div style="color:chocolate;font-size:40px;">¥<b>'+ data[i]['lowestPrice'] +'</b></div></td>');
                     $('#table-tbody').append('</tr>');
                 }
@@ -196,6 +197,62 @@
     }
 
     $(function () {
+        $("#time-all-data").on('click', function() {
+            var now_date = new Date();
+            var now_year = now_date.getFullYear();
+            var now_month = now_date.getMonth() + 1;
+            var now_day = now_date.getDate();
+            var now_time = now_year + '-' + now_month + '-' + now_day;
+            var now_timestamp = format_time(now_time)
+            var max_time = now_timestamp + (30 * 3 * 24 * 3600)
+
+            setoutdate = $('.setoutdate').val();
+            if(!setoutdate) {
+                layer.msg("出发日期不能为空！");
+                return false
+            }
+            setout_timestamp = format_time(setoutdate)
+            if(setout_timestamp < now_timestamp) {
+                layer.msg("出发日期不能是已经过去的时间！");
+                return false
+            }
+            if(setout_timestamp > max_time) {
+                layer.msg("出发日期不能超过3个月！");
+                return false
+            }
+
+            backdate = $('.backdate').val();
+            if(!backdate) {
+                layer.msg("返回日期不能为空！");
+                return false;
+            }
+            backdate_timestamp = format_time(backdate)
+            if(backdate_timestamp < now_timestamp) {
+                layer.msg("返回日期不能是已经过去的时间！");
+                return false
+            }
+            if(backdate_timestamp > max_time) {
+                layer.msg("返回日期不能超过3个月！");
+                return false
+            }
+            if(setout_timestamp > backdate_timestamp) {
+                layer.msg("出发日期不能大于返回日期！");
+                return false
+            }
+            $.ajax({
+                url: '/time_all_data',
+                type: 'get',
+                data: {'setoutdate': setoutdate, 'backdate': backdate},
+                dataType: 'json',
+                success: function(data) {
+                    if(data.res) {
+                        layer.msg('设置成功！');
+                    } else {
+                        layer.msg('设置失败！');
+                    }
+                }
+            });
+        });
         $("#get-data").on('click', function () {
             
             var now_date = new Date();
@@ -242,8 +299,6 @@
                 layer.msg("出发日期不能大于返回日期！");
                 return false
             }
-
-
             click_time = parseInt($(this).attr('click_time'));
             var click_now_date = (new Date()).getTime();
             if(click_now_date > (click_time+60*1000)) {
@@ -251,7 +306,7 @@
                 get_data(setoutdate, backdate, province, flight_way);
             } else {
 <!--                layer.msg("两次点击相隔5分钟！");-->
-                layer.msg("两次点击相隔30秒！");
+                layer.msg("两次点击相隔60秒！");
                 return false;
             }
         });
@@ -259,6 +314,11 @@
         $('#download-data').on('click', function() {
             download_time = ((new Date()).getTime())/1000;
             download_url = '/downloads/?filename=' + String(parseInt(download_time))
+            window.open(download_url);
+        });
+        $("#download-all-data").on('click', function() {
+            download_time = ((new Date()).getTime())/1000;
+            download_url = '/downloadsdb/?filename=' + String(parseInt(download_time))
             window.open(download_url);
         });
     })

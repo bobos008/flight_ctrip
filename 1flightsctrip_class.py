@@ -12,7 +12,8 @@ class FlightsCtrip(object):
     def __init__(self):
         self.init_url = 'https://flights.ctrip.com/'
         self.city_data_url = 'https://flights.ctrip.com/domestic/poi'
-        cuser_agent = random.choice(user_agent_list)
+        # cuser_agent = random.choice(user_agent_list)
+        cuser_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
         print(cuser_agent)
         self.user_agent = cuser_agent
         self.ss = requests.session()
@@ -112,6 +113,7 @@ class FlightsCtrip(object):
         route_type = 'routeType'
         flight = 'Flight'
         # route_type_val = 'Transit'
+        print original_data['data']['error']['msg']
         route_data = original_data.get(route_kw_data, None)
         if not route_data:
             print("get_lowest_legs_data_error:", 'no keyword name "data"')
@@ -269,9 +271,9 @@ class FlightsCtrip(object):
 
 if __name__ == '__main__':
     fc = FlightsCtrip()
-    cn1 = '南充'
+    cn1 = '广州'
     cn2 = '北京'
-    de1 = '2019-07-25'
+    de1 = '2019-07-26'
     de2 = '2019-07-31'
     cflight_type = 'Oneway'
     print(fc.get_fligth_product(cn1, cn2, de1, de2, cflight_type))
